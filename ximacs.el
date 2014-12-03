@@ -56,7 +56,8 @@
    (list (ido-completing-read "Agent: " (directory-files (get-agents-directory) nil nil t))))
   (if (not (gethash agent xi-running-agents))
       ;;TODO: Check if the agent exists
-      (let* ((default-directory (get-agent-directory agent))
+      (let* ((default-directory (get-agent-directory agent)
+               (process-connection-type nil))
              (agent-process
               (start-file-process-shell-command
                agent nil (concat "node "  "index.js 2>&1 "  "> ../../logs/" agent ".log"))))
@@ -70,6 +71,7 @@
   "Start xi-core."
   (interactive)
   (let* ((default-directory (concat xi-directory (file-name-as-directory "xi-core")))
+         (process-connection-type nil)
          (agent-process (start-file-process-shell-command
                          "xi-core" nil (concat "grunt start 2>&1 " "> ../logs/" "xi-core" ".log"))))
     (puthash "xi-core" agent-process xi-running-agents)
