@@ -1,14 +1,13 @@
-;;; ximacs.el ---  basic functions to run Xi   -*- lexical-binding: t -*-
+;;; ximacs.el ---  basic functions to run Xi -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
 ;;TODO
-;; Autocomplete for agents
 ;; Add agent to xi-init-agents
-
+;; Make customizable variables defcustom
 ;;; CODE:
 
-(setq lexical-binding t)
+
 (eval-when-compile (require 'cl-lib))
 (defvar xi-init-agents '("InputManager" "chrome-stt" "reminder" "speak")
   "Agents to be run at startup.")
@@ -29,24 +28,32 @@
 
 (defun xi-restart-agent (agent)
   "Restart AGENT."
-  (interactive "sAgent: ")
+  (interactive
+   (list (ido-completing-read "Agent: " (hash-table-keys xi-running-agents))))
   (xi-kill-agent agent)
   (xi-start-agent agent))
 
 (defun xi-kill-agent (agent)
   "Kill process for AGENT if it exists."
-  (interactive "sAgent: ")
+  (interactive
+   (list (ido-completing-read "Agent: " (hash-table-keys xi-running-agents))))
   (let ((agent-process (gethash agent xi-running-agents)))
     (when agent-process
       (delete-process agent-process))))
 
+(defun get-agents-directory ()
+  "Return agents directory."
+  (concat xi-directory (file-name-as-directory "agents")))
+
 (defun get-agent-directory (agent)
   "Return directory of AGENT."
-  (concat xi-directory (file-name-as-directory "agents") (file-name-as-directory agent)))
+  (concat (get-agents-directory) (file-name-as-directory agent)))
+
 
 (defun xi-start-agent (agent)
   "Start AGENT if it is not currently running."
-  (interactive "sAgent: ")
+  (interactive
+   (list (ido-completing-read "Agent: " (directory-files (get-agents-directory) nil nil t))))
   (if (not (gethash agent xi-running-agents))
       ;;TODO: Check if the agent exists
       (let* ((default-directory (get-agent-directory agent))
@@ -63,9 +70,9 @@
   "Start xi-core."
   (interactive)
   (let* ((default-directory (concat xi-directory (file-name-as-directory "xi-core")))
-         (agent-process (start-file-process-shell-command 
+         (agent-process (start-file-process-shell-command
                          "xi-core" nil (concat "grunt start " "> ../logs/" "xi-core" ".log"))))
-    (puthash "xi-core" agent-process xi-running-agents )
+    (puthash "xi-core" agent-process xi-running-agents)
     (set-process-sentinel agent-process
                           (lambda (process event)
                             (remhash "xi-core" xi-running-agents)))))
@@ -84,7 +91,7 @@
           (sleep-for xi-delay))
         xi-init-agents))
 
-(defun xi-stop ()
+(defun xi-kill ()
   "Stop all Xi agents."
   (interactive)
   (let ((running-agent-list (hash-table-keys xi-running-agents)))
@@ -144,8 +151,6 @@
       (xi-list-agents--refresh)
       (tabulated-list-print))
     (display-buffer buffer)))
-
-(shell-command "tail -f ~/codes/Xi_2.0/logs/reminder.log | bunyan&" "tail")
 
 (provide 'xiemacs)
 ;;; ximacs.el ends here
