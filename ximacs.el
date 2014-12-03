@@ -102,7 +102,7 @@
 (defun xi-restart ()
   "Restart all the running agents."
   (interactive)
-  (let ((running-agent-list (remove-if
+  (let ((running-agent-list (cl-remove-if
                              (lambda (x) (equal x "xi-core"))
                              (hash-table-keys xi-running-agents))))
     (xi-stop)
@@ -153,6 +153,47 @@
       (xi-list-agents--refresh)
       (tabulated-list-print))
     (display-buffer buffer)))
+
+
+(defun xi-remote-in-syncp ()
+  "Pull tracked branch and check if it in is in sync with remote, return t if in sync else nil."
+  (let ((remote (magit-get-current-remote)))
+    (message default-directory)
+    (if remote
+        (magit-run-git "fetch" remote)))
+  (let ((tracked (magit-get-tracked-branch nil t)))
+    (if (and tracked
+             (not (equal (magit-git-string "rev-parse" "HEAD")
+                         (magit-git-string "rev-parse" tracked))))
+        nil
+      t)))
+
+(defun xi-check-sync ()
+  "Check if xi-core, xal and agents are in sync with remotes.  If they are not, report defaulters."
+  (interactive)
+  (let ((directories (append (list (concat xi-directory "xi-core")
+                                   (concat xi-directory "xal-javascript"))
+                             (mapcar (lambda (d)
+                                       (file-name-as-directory (concat (get-agents-directory) d)))
+                                     (cl-remove-if (lambda (d)
+                                                  (or (equal d "..")
+                                                      (equal d ".")))
+                                                (directory-files (get-agents-directory) nil nil t)))))
+        (non-sync-dirs '()))
+    (dolist (directory directories)
+      (let ((default-directory directory))
+        (unless (xi-remote-in-syncp)
+          (push directory non-sync-dirs))))
+    (if non-sync-dirs
+        (let ((buffer (get-buffer-create "*Xi Sync*")))
+          (with-current-buffer buffer
+            (delete-region (point-min) (point-max))
+            (insert "Unsynced repos exist:\n")
+            (dolist (repo non-sync-dirs)
+              (insert (concat repo "\n")))
+            (display-buffer buffer)))
+      (message "Xi is in sync"))))
+
 
 (provide 'xiemacs)
 ;;; ximacs.el ends here
