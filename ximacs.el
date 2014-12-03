@@ -1,13 +1,14 @@
-;;; ximacs.el ---  basic functions to run Xi  -*- lexical-binding: t -*-
+;;; ximacs.el ---  basic functions to run Xi   -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
 ;;TODO
-;; Shows logs through bunyan
 ;; Autocomplete for agents
 ;; Add agent to xi-init-agents
 
 ;;; CODE:
+
+(setq lexical-binding t)
 (eval-when-compile (require 'cl-lib))
 (defvar xi-init-agents '("InputManager" "chrome-stt" "reminder" "speak")
   "Agents to be run at startup.")
@@ -49,8 +50,9 @@
   (if (not (gethash agent xi-running-agents))
       ;;TODO: Check if the agent exists
       (let* ((default-directory (get-agent-directory agent))
-             (agent-process (start-file-process-shell-command 
-                             agent nil (concat "node "  "index.js"  "> ../../logs/" agent ".log"))))
+             (agent-process
+              (start-file-process-shell-command
+               agent nil (concat "node "  "index.js"  "> ../../logs/" agent ".log"))))
         (puthash agent agent-process xi-running-agents )
         (set-process-sentinel agent-process
                               (lambda (process event)
@@ -71,8 +73,7 @@
 (defun xi-show-log (agent)
   "Show logs for AGENT in new buffer.  `auto-revert-tail-mode' is enabled for this buffer."
   (interactive "sAgent: ")
-  (display-buffer (find-file (concat xi-directory "/logs/" agent ".log")))
-  (auto-revert-tail-mode t))
+  (shell-command (concat "tail -f " (concat xi-directory "/logs/" agent ".log") " | bunyan&") (concat agent "-log")))
 
 (defun xi-start ()
   "Start all the agents specificied in `xi-init-agents'."
@@ -134,7 +135,7 @@
   (dolist (a (hash-table-keys xi-running-agents))
     (push (list a (vector a)) tabulated-list-entries)))
 
-(defun xi-running-agents-list ()
+(defun xi-list-running-agents ()
   "List all running agents."
   (interactive)
   (let ((buffer (get-buffer-create "*Running Agents*")))
@@ -143,6 +144,8 @@
       (xi-list-agents--refresh)
       (tabulated-list-print))
     (display-buffer buffer)))
+
+(shell-command "tail -f ~/codes/Xi_2.0/logs/reminder.log | bunyan&" "tail")
 
 (provide 'xiemacs)
 ;;; ximacs.el ends here
