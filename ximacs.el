@@ -59,7 +59,7 @@
       (let* ((default-directory (get-agent-directory agent))
              (agent-process
               (start-file-process-shell-command
-               agent nil (concat "node "  "index.js"  "> ../../logs/" agent ".log"))))
+               agent nil (concat "node "  "index.js 2>&1 "  "> ../../logs/" agent ".log"))))
         (puthash agent agent-process xi-running-agents )
         (set-process-sentinel agent-process
                               (lambda (process event)
@@ -71,7 +71,7 @@
   (interactive)
   (let* ((default-directory (concat xi-directory (file-name-as-directory "xi-core")))
          (agent-process (start-file-process-shell-command
-                         "xi-core" nil (concat "grunt start " "> ../logs/" "xi-core" ".log"))))
+                         "xi-core" nil (concat "grunt start 2>&1 " "> ../logs/" "xi-core" ".log"))))
     (puthash "xi-core" agent-process xi-running-agents)
     (set-process-sentinel agent-process
                           (lambda (process event)
