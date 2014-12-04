@@ -9,17 +9,29 @@
 
 
 (eval-when-compile (require 'cl-lib))
-(defvar xi-init-agents '("InputManager" "chrome-stt" "reminder" "speak")
-  "Agents to be run at startup.")
 
-(defvar xi-directory (file-name-as-directory "~/codes/Xi_2.0")
-  "Xi directory.  The default Xi structure is assumed.")
+(defgroup xi nil "Options for Xi-runner")
 
-(defvar xi-running-agents (make-hash-table :test 'equal)
-  "Hashtable with keys as agents and values as the corresponding processes.")
+(defcustom xi-init-agents
+  '("InputManager" "chrome-stt" "reminder" "speak")
+  "Agents to be run at startup."
+  :group 'xi
+  :type '(list))
 
-(defvar xi-delay 1
-  "Delay between starting agents.")
+
+(defcustom xi-directory
+  (file-name-as-directory "~/codes/Xi_2.0")
+  "Xi directory.  The default Xi structure is assumed."
+  :group 'xi
+  :type '(directory))
+
+
+(defcustom xi-delay 1
+  "Delay between starting agents."
+  :group 'xi
+  :type '(number))
+
+(defvar xi-running-agents (make-hash-table :test 'equal)  "Hashtable with keys as agents and values as the corresponding processes.")
 
 (defun xi-reset ()
   "Reset to default variables."
