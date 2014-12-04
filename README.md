@@ -13,7 +13,7 @@ In your emacs config:
 
     (load <path_to_ximacs.el>)
 
-Set `xi-directory` to the path of the root-directory and `xi-init-agents` to the list of agent names  
+Use `M-x customize-variable` to set the value of  `xi-directory` to the path of the root-directory and `xi-init-agents` to the list of agent names  
 To be crude, simply copy the contents of the `ximacs.el` into a buffer, change the required variables and run `eval-buffer`.
 
 ##Commands
@@ -36,7 +36,9 @@ Display the log of the specified agent
 
 ###xi-list-running-agents
 Display the currently running agents.  
-Use `p` and `n` to navigate the list, `l` to display the logs and `k` to kill the agent.
+Use `p` and `n` to navigate the list, `l` to display the logs, `r` to restart the agent and `k` to kill the agent.
+
+
 
 
 
