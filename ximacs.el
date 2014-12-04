@@ -56,8 +56,8 @@
    (list (ido-completing-read "Agent: " (directory-files (get-agents-directory) nil nil t))))
   (if (not (gethash agent xi-running-agents))
       ;;TODO: Check if the agent exists
-      (let* ((default-directory (get-agent-directory agent)
-               (process-connection-type nil))
+      (let* ((default-directory (get-agent-directory agent))
+             (process-connection-type nil)
              (agent-process
               (start-file-process-shell-command
                agent nil (concat "node "  "index.js 2>&1 "  "> ../../logs/" agent ".log"))))
@@ -81,7 +81,8 @@
 
 (defun xi-show-log (agent)
   "Show logs for AGENT in new buffer.  `auto-revert-tail-mode' is enabled for this buffer."
-  (interactive "sAgent: ")
+  (interactive
+   (list (ido-completing-read "Agent: " (append ' ("xi-core") (directory-files (get-agents-directory) nil nil t)))))
   (shell-command (concat "tail -f " (concat xi-directory "/logs/" agent ".log") " | bunyan&") (concat agent "-log")))
 
 (defun xi-start ()
@@ -105,7 +106,7 @@
   (let ((running-agent-list (cl-remove-if
                              (lambda (x) (equal x "xi-core"))
                              (hash-table-keys xi-running-agents))))
-    (xi-stop)
+    (xi-kill)
     (xi-start-core)
     (sleep-for xi-delay)
     (mapc 'xi-start-agent running-agent-list)))
