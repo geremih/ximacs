@@ -136,10 +136,18 @@
   (xi-show-log (tabulated-list-get-id))
   (revert-buffer))
 
+(defun xi-agent-list-restart-agent ()
+  "Restart the agent in `xi-agent-list-mode'."
+  (interactive)
+  (message "Restarting agent")
+  (xi-restart-agent (tabulated-list-get-id))
+  (revert-buffer))
+
 (defvar xi-agent-list-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map "k" 'xi-agent-list-kill-agent)
     (define-key map "l" 'xi-agent-list-show-log)
+    (define-key map "r" 'xi-agent-list-restart-agent)
     map))
 
 (defvar tabulated-list-format)
