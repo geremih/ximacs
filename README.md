@@ -9,12 +9,9 @@ Xi
 \`-- xi-core  
 
 ###Load module
-In your emacs config:
-
-    (load <path_to_ximacs.el>)
+`M-x: package-install-file RET 'path_to_ximacs.el' RET`
 
 Use `M-x customize-variable` to set the value of  `xi-directory` to the path of the root-directory and `xi-init-agents` to the list of agent names  
-To be crude, simply copy the contents of the `ximacs.el` into a buffer, change the required variables and run `eval-buffer`.
 
 ##Commands
 
