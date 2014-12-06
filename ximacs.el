@@ -1,6 +1,11 @@
 ;;; ximacs.el ---  basic functions to run Xi -*- lexical-binding: t -*-
 
-;;; Commentary:
+
+;; Author: Mihir Rege
+;; URL: http://github.com/geremih/ximacs
+;; Package-Requires: ((cl-lib "0.5") (magit "1.2.2") )
+;; Version: 0.1.0
+;; Keywords: xi
 
 ;;TODO
 ;; Add agent to xi-init-agents
@@ -33,11 +38,13 @@
 
 (defvar xi-running-agents (make-hash-table :test 'equal)  "Hashtable with keys as agents and values as the corresponding processes.")
 
+
 (defun xi-reset ()
   "Reset to default variables."
   (interactive)
   (setq xi-running-agents (make-hash-table :test 'equal)))
 
+;;;###autoload
 (defun xi-restart-agent (agent)
   "Restart AGENT."
   (interactive
@@ -45,6 +52,7 @@
   (xi-kill-agent agent)
   (xi-start-agent agent))
 
+;;;###autoload
 (defun xi-kill-agent (agent)
   "Kill process for AGENT if it exists."
   (interactive
@@ -61,7 +69,7 @@
   "Return directory of AGENT."
   (concat (get-agents-directory) (file-name-as-directory agent)))
 
-
+;;;###autoload
 (defun xi-start-agent (agent)
   "Start AGENT if it is not currently running."
   (interactive
@@ -78,7 +86,7 @@
                               (lambda (process event)
                                 (message "Removing process from hash")
                                 (remhash agent xi-running-agents))))))
-
+;;;###autoload
 (defun xi-start-core ()
   "Start xi-core."
   (interactive)
@@ -91,12 +99,14 @@
                           (lambda (process event)
                             (remhash "xi-core" xi-running-agents)))))
 
+;;;###autoload
 (defun xi-show-log (agent)
   "Show logs for AGENT in new buffer.  `auto-revert-tail-mode' is enabled for this buffer."
   (interactive
    (list (ido-completing-read "Agent: " (append ' ("xi-core") (directory-files (get-agents-directory) nil nil t)))))
   (shell-command (concat "tail -f " (concat xi-directory "/logs/" agent ".log") " | bunyan&") (concat agent "-log")))
 
+;;;###autoload
 (defun xi-start ()
   "Start all the agents specificied in `xi-init-agents'."
   (interactive)
@@ -106,12 +116,14 @@
           (sleep-for xi-delay))
         xi-init-agents))
 
+;;;###autoload
 (defun xi-kill ()
   "Stop all Xi agents."
   (interactive)
   (let ((running-agent-list (hash-table-keys xi-running-agents)))
     (mapc 'xi-kill-agent running-agent-list)))
 
+;;;###autoload
 (defun xi-restart ()
   "Restart all the running agents."
   (interactive)
@@ -165,6 +177,7 @@
   (dolist (a (hash-table-keys xi-running-agents))
     (push (list a (vector a)) tabulated-list-entries)))
 
+;;;###autoload
 (defun xi-list-running-agents ()
   "List all running agents."
   (interactive)
@@ -189,6 +202,7 @@
         nil
       t)))
 
+;;;###autoload
 (defun xi-check-sync ()
   "Check if xi-core, xal and agents are in sync with remotes.  If they are not, report defaulters."
   (interactive)
