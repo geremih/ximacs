@@ -18,11 +18,16 @@
 (defgroup xi nil "Options for Xi-runner")
 
 (defcustom xi-init-agents
-  '("InputManager" "chrome-stt" "reminder" "speak")
+  '("InputManager" "presence" "gmail" "chrome-stt" "reminder" "speak")
   "Agents to be run at startup."
   :group 'xi
   :type '(list))
 
+(defcustom xi-environment
+  '("http_proxy=" "https_proxy=" "HTTP_PROXY=" "HTTPS_PROXY=")
+  "Environment variables to be appended to `process-environment' while running xi-agents"
+  :group 'xi
+  :type '(list))
 
 (defcustom xi-directory
   (file-name-as-directory "~/codes/Xi_2.0")
@@ -78,6 +83,7 @@
       ;;TODO: Check if the agent exists
       (let* ((default-directory (get-agent-directory agent))
              (process-connection-type nil)
+             (process-environment (append xi-environment process-environment))
              (agent-process
               (start-file-process-shell-command
                agent nil (concat "node "  "index.js 2>&1 "  "> ../../logs/" agent ".log"))))
@@ -92,6 +98,7 @@
   (interactive)
   (let* ((default-directory (concat xi-directory (file-name-as-directory "xi-core")))
          (process-connection-type nil)
+         (process-environment (append xi-environment process-environment))
          (agent-process (start-file-process-shell-command
                          "xi-core" nil (concat "grunt start 2>&1 " "> ../logs/" "xi-core" ".log"))))
     (puthash "xi-core" agent-process xi-running-agents)
@@ -104,7 +111,7 @@
   "Show logs for AGENT in new buffer.  `auto-revert-tail-mode' is enabled for this buffer."
   (interactive
    (list (ido-completing-read "Agent: " (append ' ("xi-core") (directory-files (get-agents-directory) nil nil t)))))
-  (shell-command (concat "tail -f " (concat xi-directory "/logs/" agent ".log") " | bunyan&") (concat agent "-log")))
+  (shell-command (concat "tail -f " (concat xi-directory (file-name-as-directory "logs") agent ".log") " | bunyan&") (concat agent "-log")))
 
 ;;;###autoload
 (defun xi-start ()
